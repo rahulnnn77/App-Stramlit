@@ -424,6 +424,7 @@ def compute_roc(series: pd.Series, period: int = 10) -> pd.Series:
 # ─────────────────────────────────────────────────────────────
 # Vectorized Indicators History Calculation Helper
 # ─────────────────────────────────────────────────────────────
+@st.cache_data(ttl=600, show_spinner=False)
 def compute_indicators_history(tdf: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     df = tdf.copy()
     if len(df) < 14:
@@ -653,6 +654,29 @@ def load_stock_data(ticker, start_date, end_date, interval_str):
         st.error(f"Error fetching data: {e}", icon=":material/error:")
         return pd.DataFrame()
 
+@st.cache_data(ttl=600, show_spinner=False)
+def load_ticker_history(ticker: str, period: str = "2y", interval_str: str = "Daily") -> pd.DataFrame:
+    interval_map = {"Daily": "1d", "Weekly": "1wk", "Monthly": "1mo"}
+    yfinance_interval = interval_map.get(interval_str, "1d")
+    try:
+        df = yf.download(ticker, period=period, interval=yfinance_interval, progress=False)
+        if df.empty:
+            return pd.DataFrame()
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+def make_cfg_hashable(cfg: dict) -> dict:
+    new_cfg = {}
+    for k, v in cfg.items():
+        if isinstance(v, list):
+            new_cfg[k] = tuple(v)
+        else:
+            new_cfg[k] = v
+    return new_cfg
+
 @st.cache_data(ttl=300, show_spinner=False)
 def load_screener_data(tickers_tuple, interval_str="Daily"):
     interval_map = {"Daily": "1d", "Weekly": "1wk", "Monthly": "1mo"}
@@ -679,6 +703,7 @@ def parse_periods(text: str, default: list) -> list:
 # ─────────────────────────────────────────────────────────────
 # Ticker Screen Computation Logic
 # ─────────────────────────────────────────────────────────────
+@st.cache_data(ttl=600, show_spinner=False)
 def screen_ticker(tdf: pd.DataFrame, cfg: dict) -> dict | None:
     if len(tdf) < 14:
         return None
@@ -1171,8 +1196,8 @@ elif nav_choice in ["Screener", "Strategy"]:
             enable_mfi = st.toggle("MFI", value=False, key="tog_mfi")
             mfi_period = st.number_input("MFI period", 2, 100, 14, key="cfg_mfi") if enable_mfi else 14
 
-    ema_periods = parse_periods(ema_raw, [10, 21, 50, 200]) if enable_ema else []
-    sma_periods = parse_periods(sma_raw, [20, 50, 200])     if enable_sma else []
+    ema_periods = tuple(parse_periods(ema_raw, [10, 21, 50, 200])) if enable_ema else ()
+    sma_periods = tuple(parse_periods(sma_raw, [20, 50, 200]))     if enable_sma else ()
 
     screener_cfg = dict(
         enable_ema=enable_ema, ema_periods=ema_periods,
@@ -1197,37 +1222,26 @@ elif nav_choice in ["Screener", "Strategy"]:
         if not tickers_list:
             st.warning("Enter at least one ticker.", icon=":material/warning:")
         else:
-            with st.spinner(f"Downloading historical data for {len(tickers_list)} tickers..."):
-                df_raw = load_screener_data(tuple(sorted(tickers_list)), screener_interval)
-            if df_raw.empty:
-                st.error("No stock data could be downloaded.", icon=":material/error:")
+            results = []
+            prog = st.progress(0, text="Analyzing stocks...")
+            for i, t in enumerate(tickers_list):
+                tdf = load_ticker_history(t, period="2y", interval_str=screener_interval)
+                if not tdf.empty and len(tdf) >= 14:
+                    res = screen_ticker(tdf, screener_cfg)
+                    if res:
+                        res["Ticker"] = t
+                        results.append(res)
+                prog.progress((i + 1) / len(tickers_list))
+            prog.empty()
+            if results:
+                rdf = pd.DataFrame(results)
+                rdf = rdf[["Ticker"] + [c for c in rdf.columns if c != "Ticker"]]
+                st.session_state.screener_raw_df = rdf
+                st.session_state.screener_cfg_snap = screener_cfg
+                st.session_state.pop("strategy_results_df", None)
+                st.success(f"Successfully computed parameters for {len(results)} stocks!", icon=":material/check_circle:")
             else:
-                results = []
-                prog = st.progress(0, text="Analyzing stocks...")
-                for i, t in enumerate(tickers_list):
-                    tdf = pd.DataFrame(index=df_raw.index)
-                    for col in ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']:
-                        if isinstance(df_raw.columns, pd.MultiIndex):
-                            if (col, t) in df_raw.columns: tdf[col] = df_raw[(col, t)]
-                        else:
-                            if col in df_raw.columns: tdf[col] = df_raw[col]
-                    tdf = tdf.dropna(subset=['Close'])
-                    if len(tdf) >= 14:
-                        res = screen_ticker(tdf, screener_cfg)
-                        if res:
-                            res["Ticker"] = t
-                            results.append(res)
-                    prog.progress((i + 1) / len(tickers_list))
-                prog.empty()
-                if results:
-                    rdf = pd.DataFrame(results)
-                    rdf = rdf[["Ticker"] + [c for c in rdf.columns if c != "Ticker"]]
-                    st.session_state.screener_raw_df = rdf
-                    st.session_state.screener_cfg_snap = screener_cfg
-                    st.session_state.pop("strategy_results_df", None)
-                    st.success(f"Successfully computed parameters for {len(results)} stocks!", icon=":material/check_circle:")
-                else:
-                    st.warning("No valid computed details for scanned list.", icon=":material/warning:")
+                st.warning("No valid computed details for scanned list.", icon=":material/warning:")
 
     # --- SCREENER DISPLAY VIEW ---
     if nav_choice == "Screener" and "screener_raw_df" in st.session_state:
@@ -1614,38 +1628,26 @@ elif nav_choice == "Saved Strategies":
             if not target_tickers:
                 st.warning("Please enter at least one target stock ticker.")
             else:
-                with st.spinner("Downloading data for selected stocks..."):
-                    df_raw = load_screener_data(tuple(sorted(target_tickers)), saved_strat_interval)
+                results = []
+                prog = st.progress(0, text="Calculating indicator math...")
+                saved_cfg = make_cfg_hashable(strat_info.get("cfg", {}))
                 
-                if df_raw.empty:
-                    st.error("Failed to retrieve price data.", icon=":material/error:")
-                else:
-                    results = []
-                    prog = st.progress(0, text="Calculating indicator math...")
-                    saved_cfg = strat_info.get("cfg", {})
+                for i, t in enumerate(target_tickers):
+                    tdf = load_ticker_history(t, period="2y", interval_str=saved_strat_interval)
+                    if not tdf.empty and len(tdf) >= 14:
+                        res = screen_ticker(tdf, saved_cfg)
+                        if res:
+                            res["Ticker"] = t
+                            results.append(res)
+                    prog.progress((i + 1) / len(target_tickers))
+                prog.empty()
+                
+                if results:
+                    rdf = pd.DataFrame(results)
+                    rdf = rdf[["Ticker"] + [c for c in rdf.columns if c != "Ticker"]]
                     
-                    for i, t in enumerate(target_tickers):
-                        tdf = pd.DataFrame(index=df_raw.index)
-                        for col in ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']:
-                            if isinstance(df_raw.columns, pd.MultiIndex):
-                                if (col, t) in df_raw.columns: tdf[col] = df_raw[(col, t)]
-                            else:
-                                if col in df_raw.columns: tdf[col] = df_raw[col]
-                        tdf = tdf.dropna(subset=['Close'])
-                        if len(tdf) >= 14:
-                            res = screen_ticker(tdf, saved_cfg)
-                            if res:
-                                res["Ticker"] = t
-                                results.append(res)
-                        prog.progress((i + 1) / len(target_tickers))
-                    prog.empty()
-                    
-                    if results:
-                        rdf = pd.DataFrame(results)
-                        rdf = rdf[["Ticker"] + [c for c in rdf.columns if c != "Ticker"]]
-                        
-                        entry_mask_current = apply_strategy(rdf.copy(), e_conds, e_mm)
-                        exit_mask_current  = apply_strategy(rdf.copy(), ex_conds, ex_mm)
+                    entry_mask_current = apply_strategy(rdf.copy(), e_conds, e_mm)
+                    exit_mask_current  = apply_strategy(rdf.copy(), ex_conds, ex_mm)
                         
                         rdf["Signal Status"] = "HOLD / NEUTRAL"
                         rdf.loc[rdf["Ticker"].isin(entry_mask_current["Ticker"]), "Signal Status"] = "BUY / ENTRY 🟢"
@@ -1724,35 +1726,22 @@ elif nav_choice == "Backtester":
             if not target_tickers:
                 st.warning("Enter at least one target stock ticker.")
             else:
-                with st.spinner("Downloading 2-year history data for chosen tickers..."):
-                    df_raw = load_screener_data(tuple(sorted(target_tickers)), backtest_interval)
+                all_trades = []
+                prog = st.progress(0, text="Backtesting targets...")
+                saved_cfg = make_cfg_hashable(strat_info.get("cfg", {}))
                 
-                if df_raw.empty:
-                    st.error("No historical stock data retrieved.", icon=":material/error:")
-                else:
-                    all_trades = []
-                    prog = st.progress(0, text="Backtesting targets...")
-                    saved_cfg = strat_info.get("cfg", {})
+                for idx, t in enumerate(target_tickers):
+                    tdf = load_ticker_history(t, period="2y", interval_str=backtest_interval)
+                    if not tdf.empty and len(tdf) >= 14:
+                        # 1. Compute indicators across timeline
+                        history_df = compute_indicators_history(tdf, saved_cfg)
+                        
+                        # 2. Chronological position simulator
+                        sim_trades = run_backtest_simulation(t, history_df, e_conds, ex_conds, sl_val, e_mm, ex_mm)
+                        all_trades.extend(sim_trades)
                     
-                    for idx, t in enumerate(target_tickers):
-                        tdf = pd.DataFrame(index=df_raw.index)
-                        for col in ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']:
-                            if isinstance(df_raw.columns, pd.MultiIndex):
-                                if (col, t) in df_raw.columns: tdf[col] = df_raw[(col, t)]
-                            else:
-                                if col in df_raw.columns: tdf[col] = df_raw[col]
-                        tdf = tdf.dropna(subset=['Close'])
-                        
-                        if len(tdf) >= 14:
-                            # 1. Compute indicators across timeline
-                            history_df = compute_indicators_history(tdf, saved_cfg)
-                            
-                            # 2. Chronological position simulator
-                            sim_trades = run_backtest_simulation(t, history_df, e_conds, ex_conds, sl_val, e_mm, ex_mm)
-                            all_trades.extend(sim_trades)
-                        
-                        prog.progress((idx + 1) / len(target_tickers))
-                    prog.empty()
+                    prog.progress((idx + 1) / len(target_tickers))
+                prog.empty()
                     
                     if not all_trades:
                         st.info("No trade signals were triggered historically for the selected configurations.", icon=":material/info:")
