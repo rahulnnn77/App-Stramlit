@@ -1742,55 +1742,54 @@ elif nav_choice == "Backtester":
                     
                     prog.progress((idx + 1) / len(target_tickers))
                 prog.empty()
+                if not all_trades:
+                    st.info("No trade signals were triggered historically for the selected configurations.", icon=":material/info:")
+                else:
+                    trades_df = pd.DataFrame(all_trades)
                     
-                    if not all_trades:
-                        st.info("No trade signals were triggered historically for the selected configurations.", icon=":material/info:")
-                    else:
-                        trades_df = pd.DataFrame(all_trades)
-                        
-                        # Compute Summary KPI Metrics
-                        total_trades = len(trades_df)
-                        winning_trades = len(trades_df[trades_df["Return %"] > 0])
-                        win_rate = (winning_trades / total_trades) * 100
-                        avg_return = float(trades_df["Return %"].mean())
-                        avg_runup  = float(trades_df["Max Run-up %"].mean())
-                        avg_drawdown = float(trades_df["Max Drawdown %"].mean())
-                        
-                        # Compute advanced drawdowns & growth rates
-                        dd_metrics = compute_backtest_drawdowns(trades_df, total_period_years=2.0)
-                        
-                        st.subheader("Backtest Performance Summary")
-                        kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
-                        with kpi1: st.metric("Total Trades", f"{total_trades}")
-                        with kpi2: st.metric("Win Rate", f"{win_rate:.1f}%")
-                        with kpi3: st.metric("Avg Return", f"{avg_return:+.2f}%")
-                        with kpi4: st.metric("CAGR", f"{dd_metrics['cagr_pct']:+.2f}%")
-                        with kpi5: st.metric("Calmar Ratio", f"{dd_metrics['calmar']:.2f}")
-                        
-                        st.markdown("<p class='section-label'>Drawdown & Risk Statistics</p>", unsafe_allow_html=True)
-                        with st.container(border=True):
-                            dk1, dk2, dk3, dk4 = st.columns(4)
-                            with dk1:
-                                st.metric("Max Drawdown", f"{dd_metrics['max_dd_pct']:.2f}%")
-                                st.caption(f"Max DD Period: **{dd_metrics['max_dd_period']} trades**")
-                            with dk2:
-                                st.metric("Current Drawdown", f"{dd_metrics['current_dd_pct']:.2f}%")
-                                st.caption(f"Current DD Period: **{dd_metrics['current_dd_period']} trades**")
-                            with dk3:
-                                st.metric("Number of Drawdowns", f"{dd_metrics['num_drawdowns']}")
-                            with dk4:
-                                st.metric("Mean / Median DD", f"{dd_metrics['mean_dd_pct']:.1f}% / {dd_metrics['median_dd_pct']:.1f}%")
-                        
-                        st.divider()
-                        st.subheader("Simulated Trade Signals Log")
-                        st.dataframe(trades_df, width="stretch")
-                        
-                        csv_trades = trades_df.to_csv(index=False).encode('utf-8')
-                        st.download_button(
-                            label=f"📥 Download backtest trade logs — {selected_strat_name}",
-                            data=csv_trades,
-                            file_name=f"{selected_strat_name.replace(' ', '_').lower()}_backtest_results.csv",
-                            mime="text/csv",
-                            key="dl-backtest-res-btn",
-                            width="stretch"
-                        )
+                    # Compute Summary KPI Metrics
+                    total_trades = len(trades_df)
+                    winning_trades = len(trades_df[trades_df["Return %"] > 0])
+                    win_rate = (winning_trades / total_trades) * 100
+                    avg_return = float(trades_df["Return %"].mean())
+                    avg_runup  = float(trades_df["Max Run-up %"].mean())
+                    avg_drawdown = float(trades_df["Max Drawdown %"].mean())
+                    
+                    # Compute advanced drawdowns & growth rates
+                    dd_metrics = compute_backtest_drawdowns(trades_df, total_period_years=2.0)
+                    
+                    st.subheader("Backtest Performance Summary")
+                    kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+                    with kpi1: st.metric("Total Trades", f"{total_trades}")
+                    with kpi2: st.metric("Win Rate", f"{win_rate:.1f}%")
+                    with kpi3: st.metric("Avg Return", f"{avg_return:+.2f}%")
+                    with kpi4: st.metric("CAGR", f"{dd_metrics['cagr_pct']:+.2f}%")
+                    with kpi5: st.metric("Calmar Ratio", f"{dd_metrics['calmar']:.2f}")
+                    
+                    st.markdown("<p class='section-label'>Drawdown & Risk Statistics</p>", unsafe_allow_html=True)
+                    with st.container(border=True):
+                        dk1, dk2, dk3, dk4 = st.columns(4)
+                        with dk1:
+                            st.metric("Max Drawdown", f"{dd_metrics['max_dd_pct']:.2f}%")
+                            st.caption(f"Max DD Period: **{dd_metrics['max_dd_period']} trades**")
+                        with dk2:
+                            st.metric("Current Drawdown", f"{dd_metrics['current_dd_pct']:.2f}%")
+                            st.caption(f"Current DD Period: **{dd_metrics['current_dd_period']} trades**")
+                        with dk3:
+                            st.metric("Number of Drawdowns", f"{dd_metrics['num_drawdowns']}")
+                        with dk4:
+                            st.metric("Mean / Median DD", f"{dd_metrics['mean_dd_pct']:.1f}% / {dd_metrics['median_dd_pct']:.1f}%")
+                    
+                    st.divider()
+                    st.subheader("Simulated Trade Signals Log")
+                    st.dataframe(trades_df, width="stretch")
+                    
+                    csv_trades = trades_df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label=f"📥 Download backtest trade logs — {selected_strat_name}",
+                        data=csv_trades,
+                        file_name=f"{selected_strat_name.replace(' ', '_').lower()}_backtest_results.csv",
+                        mime="text/csv",
+                        key="dl-backtest-res-btn",
+                        width="stretch"
+                    )
