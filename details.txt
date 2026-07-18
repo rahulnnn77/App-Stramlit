@@ -1,0 +1,6 @@
+Streamlit Application for feteching data using Yfincnce App 
+
+I will Provide name of the stock, and this app should fetch OHLC data of the stock
+using Yfincnce, I will also provide the specfic time frame in which i want the data (daily,weekly,monthly) and i will give the start and end data of data which i need to fetch 
+
+at last i need a CSV file containing the data of specfic stock.

@@ -1,0 +1,19 @@
+[theme]
+base = "light"
+primaryColor = "#0066cc"           # Apple blue accent
+backgroundColor = "#FFFFFF"        # Clean white background
+secondaryBackgroundColor = "#F5F5F7" # Apple-like light grey background
+codeBackgroundColor = "#E8E8ED"
+textColor = "#1D1D1F"              # Deep grey/black text
+linkColor = "#0066cc"
+borderColor = "#D2D2D7"            # Subtle borders
+showWidgetBorder = true
+showSidebarBorder = false
+baseRadius = "12px"                # Rounded corners
+buttonRadius = "999px"             # Pill-shaped buttons
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+codeFont = "JetBrains Mono:https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+baseFontSize = 14
+headingFontSizes = ["40px", "32px", "24px", "20px", "16px", "14px"]
+headingFontWeights = [700, 600, 600, 600, 600, 600]
+linkUnderline = false

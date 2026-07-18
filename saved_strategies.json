@@ -1,0 +1,311 @@
+{
+    "HPS Alpha": {
+        "conditions": [
+            {
+                "lhs_col": "EMA 63",
+                "op": ">=",
+                "rhs_type": "Column",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            },
+            {
+                "lhs_col": "Change %",
+                "op": ">",
+                "rhs_type": "Value",
+                "rhs_val": 3.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "match_mode": "AND (all must match)",
+        "cfg": {
+            "enable_ema": true,
+            "ema_periods": [
+                63
+            ],
+            "enable_sma": false,
+            "sma_periods": [],
+            "enable_rsi": false,
+            "rsi_period": 14,
+            "enable_adx": false,
+            "adx_period": 14,
+            "enable_macd": false,
+            "macd_fast": 12,
+            "macd_slow": 26,
+            "macd_signal": 9,
+            "enable_bb": false,
+            "bb_period": 20,
+            "enable_stoch": false,
+            "stoch_k": 14,
+            "stoch_d": 3,
+            "enable_atr": false,
+            "atr_period": 14,
+            "enable_cci": false,
+            "cci_period": 20,
+            "enable_willr": false,
+            "willr_period": 14,
+            "enable_vwap": false,
+            "enable_obv": false,
+            "enable_mfi": false,
+            "mfi_period": 14,
+            "enable_roc": false,
+            "roc_period": 10
+        },
+        "created_at": "2026-07-18 04:32:32"
+    },
+    "TEST-2": {
+        "entry_conditions": [
+            {
+                "lhs_col": "EMA 63",
+                "op": ">=",
+                "rhs_type": "Column",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            },
+            {
+                "lhs_col": "ADX 14",
+                "op": ">=",
+                "rhs_type": "Value",
+                "rhs_val": 25.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "exit_conditions": [
+            {
+                "lhs_col": "Close",
+                "op": "<",
+                "rhs_type": "Value",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "stop_loss_pct": 0.0,
+        "entry_match_mode": "AND (all must match)",
+        "exit_match_mode": "AND (all must match)",
+        "cfg": {
+            "enable_ema": true,
+            "ema_periods": [
+                63
+            ],
+            "enable_sma": false,
+            "sma_periods": [],
+            "enable_rsi": false,
+            "rsi_period": 14,
+            "enable_adx": true,
+            "adx_period": 14,
+            "enable_macd": false,
+            "macd_fast": 12,
+            "macd_slow": 26,
+            "macd_signal": 9,
+            "enable_bb": false,
+            "bb_period": 20,
+            "enable_stoch": false,
+            "stoch_k": 14,
+            "stoch_d": 3,
+            "enable_atr": false,
+            "atr_period": 14,
+            "enable_cci": false,
+            "cci_period": 20,
+            "enable_willr": false,
+            "willr_period": 14,
+            "enable_vwap": false,
+            "enable_obv": false,
+            "enable_mfi": false,
+            "mfi_period": 14,
+            "enable_roc": false,
+            "roc_period": 10
+        },
+        "created_at": "2026-07-18 04:53:54"
+    },
+    "Test-3 (With SL)": {
+        "entry_conditions": [
+            {
+                "lhs_col": "EMA 63",
+                "op": ">=",
+                "rhs_type": "Column",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            },
+            {
+                "lhs_col": "ADX 14",
+                "op": ">=",
+                "rhs_type": "Value",
+                "rhs_val": 25.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "exit_conditions": [
+            {
+                "lhs_col": "Close",
+                "op": "<",
+                "rhs_type": "Value",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "stop_loss_pct": 5.0,
+        "entry_match_mode": "AND (all must match)",
+        "exit_match_mode": "AND (all must match)",
+        "cfg": {
+            "enable_ema": true,
+            "ema_periods": [
+                63
+            ],
+            "enable_sma": false,
+            "sma_periods": [],
+            "enable_rsi": false,
+            "rsi_period": 14,
+            "enable_adx": true,
+            "adx_period": 14,
+            "enable_macd": false,
+            "macd_fast": 12,
+            "macd_slow": 26,
+            "macd_signal": 9,
+            "enable_bb": false,
+            "bb_period": 20,
+            "enable_stoch": false,
+            "stoch_k": 14,
+            "stoch_d": 3,
+            "enable_atr": false,
+            "atr_period": 14,
+            "enable_cci": false,
+            "cci_period": 20,
+            "enable_willr": false,
+            "willr_period": 14,
+            "enable_vwap": false,
+            "enable_obv": false,
+            "enable_mfi": false,
+            "mfi_period": 14,
+            "enable_roc": false,
+            "roc_period": 10
+        },
+        "created_at": "2026-07-18 05:08:41"
+    },
+    "My Custom Strategy": {
+        "entry_conditions": [
+            {
+                "lhs_col": "EMA 63",
+                "op": ">=",
+                "rhs_type": "Column",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            },
+            {
+                "lhs_col": "ADX 14",
+                "op": ">=",
+                "rhs_type": "Value",
+                "rhs_val": 25.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "exit_conditions": [
+            {
+                "lhs_col": "Close",
+                "op": "<",
+                "rhs_type": "Value",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "stop_loss_pct": 0.0,
+        "entry_match_mode": "AND (all must match)",
+        "exit_match_mode": "AND (all must match)",
+        "cfg": {
+            "enable_ema": true,
+            "ema_periods": [
+                63
+            ],
+            "enable_sma": false,
+            "sma_periods": [],
+            "enable_rsi": false,
+            "rsi_period": 14,
+            "enable_adx": true,
+            "adx_period": 14,
+            "enable_macd": false,
+            "macd_fast": 12,
+            "macd_slow": 26,
+            "macd_signal": 9,
+            "enable_bb": false,
+            "bb_period": 20,
+            "enable_stoch": false,
+            "stoch_k": 14,
+            "stoch_d": 3,
+            "enable_atr": false,
+            "atr_period": 14,
+            "enable_cci": false,
+            "cci_period": 20,
+            "enable_willr": false,
+            "willr_period": 14,
+            "enable_vwap": false,
+            "enable_obv": false,
+            "enable_mfi": false,
+            "mfi_period": 14,
+            "enable_roc": false,
+            "roc_period": 10
+        },
+        "created_at": "2026-07-18 05:06:42"
+    },
+    "Test-4": {
+        "entry_conditions": [
+            {
+                "lhs_col": "EMA 63",
+                "op": ">=",
+                "rhs_type": "Column",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            },
+            {
+                "lhs_col": "Change %",
+                "op": ">",
+                "rhs_type": "Value",
+                "rhs_val": 2.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "exit_conditions": [
+            {
+                "lhs_col": "Close",
+                "op": "<",
+                "rhs_type": "Value",
+                "rhs_val": 0.0,
+                "rhs_col": "Close"
+            }
+        ],
+        "stop_loss_pct": 0.0,
+        "entry_match_mode": "AND (all must match)",
+        "exit_match_mode": "AND (all must match)",
+        "cfg": {
+            "enable_ema": true,
+            "ema_periods": [
+                63
+            ],
+            "enable_sma": false,
+            "sma_periods": [],
+            "enable_rsi": false,
+            "rsi_period": 14,
+            "enable_adx": false,
+            "adx_period": 14,
+            "enable_macd": false,
+            "macd_fast": 12,
+            "macd_slow": 26,
+            "macd_signal": 9,
+            "enable_bb": false,
+            "bb_period": 20,
+            "enable_stoch": false,
+            "stoch_k": 14,
+            "stoch_d": 3,
+            "enable_atr": false,
+            "atr_period": 14,
+            "enable_cci": false,
+            "cci_period": 20,
+            "enable_willr": false,
+            "willr_period": 14,
+            "enable_vwap": false,
+            "enable_obv": false,
+            "enable_mfi": false,
+            "mfi_period": 14,
+            "enable_roc": false,
+            "roc_period": 10
+        },
+        "created_at": "2026-07-18 05:16:36"
+    }
+}
