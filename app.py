@@ -57,7 +57,7 @@ OPERATORS = [">", "<", ">=", "<=", "==", "!="]
 # Page Config (Sidebar is expanded by default for easy use)
 # ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Stocks",
+    page_title="Alphaquanttester",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -72,7 +72,7 @@ if st.session_state.get("edit_load_requested"):
 # Sidebar Controls Hub (Rendered first to set Dark Theme state)
 # ─────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">Stocks Control</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-title">Alphaquanttester</div>', unsafe_allow_html=True)
     
     # ── Dark Mode Toggle ──
     dark_theme = st.toggle("Dark Theme 🌙", value=False, key="sb_dark_theme")
