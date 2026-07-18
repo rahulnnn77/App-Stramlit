@@ -57,7 +57,7 @@ OPERATORS = [">", "<", ">=", "<=", "==", "!="]
 # Page Config (Sidebar is expanded by default for easy use)
 # ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Alphaquanttester",
+    page_title="AQ Tester",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -72,7 +72,7 @@ if st.session_state.get("edit_load_requested"):
 # Sidebar Controls Hub (Rendered first to set Dark Theme state)
 # ─────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">Alphaquanttester</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-title">AQ Tester</div>', unsafe_allow_html=True)
     
     # ── Dark Mode Toggle ──
     dark_theme = st.toggle("Dark Theme 🌙", value=False, key="sb_dark_theme")
@@ -1648,18 +1648,18 @@ elif nav_choice == "Saved Strategies":
                     
                     entry_mask_current = apply_strategy(rdf.copy(), e_conds, e_mm)
                     exit_mask_current  = apply_strategy(rdf.copy(), ex_conds, ex_mm)
-                        
-                        rdf["Signal Status"] = "HOLD / NEUTRAL"
-                        rdf.loc[rdf["Ticker"].isin(entry_mask_current["Ticker"]), "Signal Status"] = "BUY / ENTRY 🟢"
-                        rdf.loc[rdf["Ticker"].isin(exit_mask_current["Ticker"]), "Signal Status"] = "SELL / EXIT 🔴"
-                        
-                        st.subheader(f"Strategy Scan Signals")
-                        st.dataframe(rdf, width="stretch")
-                        
-                        csv_matched = rdf.to_csv(index=False).encode('utf-8')
-                        st.download_button(label=f"📥 Download matches for '{selected_strat_name}'", data=csv_matched, file_name=f"{selected_strat_name.replace(' ', '_').lower()}_matches.csv", mime="text/csv", key="dl-saved-strat-res", width="stretch")
-                    else:
-                        st.warning("No valid indicators could be computed for the targets.")
+                    
+                    rdf["Signal Status"] = "HOLD / NEUTRAL"
+                    rdf.loc[rdf["Ticker"].isin(entry_mask_current["Ticker"]), "Signal Status"] = "BUY / ENTRY 🟢"
+                    rdf.loc[rdf["Ticker"].isin(exit_mask_current["Ticker"]), "Signal Status"] = "SELL / EXIT 🔴"
+                    
+                    st.subheader(f"Strategy Scan Signals")
+                    st.dataframe(rdf, width="stretch")
+                    
+                    csv_matched = rdf.to_csv(index=False).encode('utf-8')
+                    st.download_button(label=f"📥 Download matches for '{selected_strat_name}'", data=csv_matched, file_name=f"{selected_strat_name.replace(' ', '_').lower()}_matches.csv", mime="text/csv", key="dl-saved-strat-res", width="stretch")
+                else:
+                    st.warning("No valid indicators could be computed for the targets.")
 
 # --- HISTORICAL BACKTESTING TOOL VIEW ---
 elif nav_choice == "Backtester":
